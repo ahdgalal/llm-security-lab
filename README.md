@@ -14,11 +14,25 @@ A small Python project that uses the OpenAI SDK to send prompts to an OpenAI mod
 Create a .env file in the project folder:
 OPENAI_API_KEY=your_api_key_here
 
+# Requirements
+
+Python 3.xx
+API-Key
+
 # Run 
 
 ```
 uv run main.py
 ```
+
+# Temperature Experiment
+
+The project runs the same prompt using different temperature values, such as:
+
+Temperature: 0.2
+Temperature: 1.0
+
+Lower temperatures produce more predictable responses, while higher temperatures allow more variation in the generated output.
 
 # Output Example
 
@@ -34,3 +48,6 @@ An SDK, or Software Development Kit, is a collection of tools, libraries, and do
 Tokens used: 99
 ```
 
+# Future work
+
+ - v2.0 will handle the risk of LLM01:2026 Prompt Injection in the OWASP Top 10 for LLM Applications 2026. In addition that it is the number 1 risk that faces LLM as of September 2026, it is also the easiest one and doesnt have a certain format to be defended against completely.
