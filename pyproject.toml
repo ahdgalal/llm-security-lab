@@ -1,7 +1,7 @@
 [project]
 name = "llm-security-lab"
 version = "0.1.0"
-description = "Add your description here"
+description = "A small Python project that uses the OpenAI SDK to send prompts to an OpenAI model and compare responses at different temperature values."
 readme = "README.md"
 authors = [
     { name = "ahdgalal", email = "ahdgalal1@gmail.com" }
@@ -11,10 +11,3 @@ dependencies = [
     "openai>=3.24.0",
     "python-dotenv>=1.2.4",
 ]
-
-[project.scripts]
-llm-security-lab = "llm_security_lab:main"
-
-[build-system]
-requires = ["uv_build>=0.12.17,<0.13.0"]
-build-backend = "uv_build"
