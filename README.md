@@ -1,4 +1,4 @@
-# LLM-API LAB
+# llm-security-lab
 
 A small Python project that uses the OpenAI SDK to send prompts to an OpenAI model and compare responses at different temperature values.
 
@@ -16,7 +16,7 @@ OPENAI_API_KEY=your_api_key_here
 
 # Requirements
 
-Python 3.xx
+Python 3.12+
 API-Key
 
 # Run 
@@ -29,23 +29,27 @@ uv run main.py
 
 The project runs the same prompt using different temperature values, such as:
 
-Temperature: 0.2
-Temperature: 1.0
+Temperature	Observed result
+0.0	Responses were highly consistent
+0.5	Responses were mostly consistent, with some variation
+1.0	Responses showed more variation
 
-Lower temperatures produce more predictable responses, while higher temperatures allow more variation in the generated output.
+Initial runs produced nearly identical answers at different temperatures, showing that one run is not enough to observe variation. After running each temperature multiple times, higher temperatures produced more varied responses, while lower temperatures were more consistent. Overall, temperature affects randomness, but the difference may not be obvious in every individual run.
+
 
 # Output Example
 
 ```
 === Temperature 0.2 ===
-An SDK, or Software Development Kit, is a collection of tools, libraries, documentation, and code samples that developers use to create applications for a specific platform or framework. It typically includes APIs, debuggers, and emulators to streamline the development process. By providing these resources, an SDK helps developers build, test, and deploy software more efficiently and effectively.
+An SDK (Software Development Kit) is a collection of software tools, libraries, and documentation provided by a company or platform to help developers build applications for its ecosystem. It typically includes pre-written code, APIs, and sample projects that streamline the development process without requiring developers to write everything from scratch. Common examples include Apple's Xcode SDK for iOS/macOS development and Google's Android SDK for mobile app creation.
 
-Tokens used: 101
+Tokens used: 331
 
 === Temperature 1.0 ===
-An SDK, or Software Development Kit, is a collection of tools, libraries, and documentation that developers use to build applications for a specific platform, framework, or service. It typically includes code samples, APIs, and utilities to simplify and speed up the development process. By using an SDK, developers can more easily integrate specific features or services into their applications.
+An SDK (Software Development Kit) is a collection of tools, libraries, documentation, and code samples that developers use to build applications for a specific platform or service. It simplifies the development process by providing pre-built components so programmers don't have to write code from scratch for common functions like authentication or hardware access. Essentially, it acts as a specialized toolbox that ensures compatibility and accelerates the creation of software for a target environment.
 
-Tokens used: 99
+Tokens used: 136
+
 ```
 
 # Future work
