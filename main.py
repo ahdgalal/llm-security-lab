@@ -4,28 +4,26 @@ load_dotenv()
 from openai import OpenAI
 import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def main():
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=os.getenv("OPENROUTER_API_KEY")
+        ) # expires Apr 2, 2027
 
-prompt = "Explain what an SDK is in 3 sentences."
+    prompt = "Explain what an SDK is in 3 sentences."
+    temp = [0.2,1.0]
 
-response_low  = client.responses.create(
-    model="gpt-4.1",
-    temperature=0.2,
-    instructions="You are a helpful assistant.",
-    input=prompt,
-)
+    for t in temp:
+        response = client.responses.create(
+            model="openrouter/free",
+            temperature=t,
+            instructions="You are a helpful assistant.",
+            input=prompt,
+        )
 
-response_high  = client.responses.create(
-    model="gpt-4.1",
-    temperature=1.0,
-    instructions="You are a helpful assistant.",
-    input=prompt,
-)
+        print(f"=== Temperature {t} ===")
+        print(response.output_text)
+        print(f"\nTokens used: {response.usage.total_tokens}")
 
-print("=== Temperature 0.2 ===")
-print(response_low.output_text)
-print(f"\nTokens used: {response_low.usage.total_tokens}")
-
-print("\n=== Temperature 1.0 ===")
-print(response_high.output_text)
-print(f"\nTokens used: {response_high.usage.total_tokens}")
+if __name__ == "__main__":
+    main()
