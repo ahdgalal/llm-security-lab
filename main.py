@@ -57,8 +57,7 @@ class OpenAIProvider(LLMProvider):
         )
 
         latency = time.perf_counter() - start
-        print(response.usage)
-        print(response.usage.output_tokens_details)
+
 
         return LLMResult(
             text=response.output_text,
@@ -71,7 +70,7 @@ class OpenAIProvider(LLMProvider):
         )
 
 
-class Provider(LLMProvider):
+class OpenRouterProvider(LLMProvider):
 
     def __init__(self, client=None, model: str = "openrouter/free", temperature=0.7):
 
@@ -102,8 +101,6 @@ class Provider(LLMProvider):
         )
 
         latency = time.perf_counter() - start
-        print(response.usage)
-        print(response.usage.output_tokens_details)
 
         return LLMResult(
             text=response.output_text,
@@ -121,7 +118,7 @@ def get_provider() -> LLMProvider:
     provider = os.getenv("PROVIDER")
 
     if provider == "openrouter":
-        return Provider()
+        return OpenRouterProvider()
 
     elif provider == "openai":
         return OpenAIProvider()
@@ -131,12 +128,16 @@ def get_provider() -> LLMProvider:
 
 def main():
 
-    provider = get_provider()
+    try:
 
-    result = provider.send(
-        system_prompt="You are a helpful assistant.",
-        user_message="Explain embeddings in one simple paragraph.",
-    )
+        provider = get_provider()
+
+        result = provider.send(
+            system_prompt="You are a helpful assistant.",
+            user_message="Explain embeddings in one simple paragraph.",
+        )
+    except ValueError as e:
+        print(f"\nConfiguration Error: {e}")
 
     print("Reply")
     print("--------------")

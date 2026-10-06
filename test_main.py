@@ -1,23 +1,24 @@
 import pytest
 from types import SimpleNamespace
-from main import LLMResult, LLMConfig, OpenAIProvider, Provider, get_provider
+from main import LLMResult, LLMConfig, OpenAIProvider, OpenRouterProvider, get_provider
 
 
 # fake OpenAI response
 def fake_response():
     return SimpleNamespace(
         output_text="Hello from the fake model!",
+        model="fake/model",
         usage=SimpleNamespace(
             input_tokens=10,
             output_tokens=5,
+            output_tokens_details=SimpleNamespace(reasoning_tokens=2),
+
         ),
     )
-
 
 class FakeResponses:
     def create(self, **kwargs):
         return fake_response()
-
 
 class FakeClient:
     def __init__(self):
@@ -40,10 +41,11 @@ def test_openai_provider_converts_response():
     assert result.output_tokens == 5
     assert result.provider == "openai"
     assert result.model == "gpt-5-nano"
+    assert result.latency >= 0
 
 
 def test_openrouter_provider_converts_response():
-    provider = Provider(client=FakeClient())
+    provider = OpenRouterProvider(client=FakeClient())
 
     result = provider.send(
         system_prompt="You are helpful.",
@@ -55,8 +57,20 @@ def test_openrouter_provider_converts_response():
     assert result.input_tokens == 10
     assert result.output_tokens == 5
     assert result.provider == "openrouter"
-    assert result.model == "openrouter/free"
+    assert result.model == "fake/model"
+    assert result.latency >= 0
 
+def test_missing_provider(monkeypatch):
+    monkeypatch.delenv("PROVIDER", raising=False)
+
+    with pytest.raises(ValueError, match="Unknown provider"):
+        get_provider()
+
+def test_unknown_provider(monkeypatch):
+    monkeypatch.setenv("PROVIDER", "something_else")
+
+    with pytest.raises(ValueError, match="Unknown provider"):
+        get_provider()
 
 
 # environment variable tests
@@ -64,19 +78,15 @@ def test_openrouter_provider_converts_response():
 def test_environment_selects_openai(monkeypatch):
     monkeypatch.setenv("PROVIDER", "openai")
     monkeypatch.setenv("OPENAI_API_KEY", "fake-key")
-
     provider = get_provider()
-
     assert isinstance(provider, OpenAIProvider)
 
 
 def test_environment_selects_openrouter(monkeypatch):
     monkeypatch.setenv("PROVIDER", "openrouter")
     monkeypatch.setenv("OPENROUTER_API_KEY", "fake-key")
-
     provider = get_provider()
-
-    assert isinstance(provider, Provider)
+    assert isinstance(provider, OpenRouterProvider)
 
 
 # missing API key test
