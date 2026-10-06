@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-load_dotenv()
 
 from openai import OpenAI
 import os
@@ -128,6 +127,7 @@ def get_provider() -> LLMProvider:
 
 
 def main():
+    load_dotenv()
 
     try:
         provider = get_provider()
