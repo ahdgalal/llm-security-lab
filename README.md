@@ -1,57 +1,166 @@
-# llm-security-lab
+# LLM Security Lab
 
-A small Python project that uses the OpenAI SDK to send prompts to an OpenAI model and compare responses at different temperature values.
+A small Python project for working with multiple LLM providers through one shared interface. It uses the OpenAI SDK, Pydantic, and pytest.
 
-# What it does
+## What it does
 
-- Sends a system instruction and user prompt to an OpenAI model.
-- Runs the same prompt with different temperature values.
-- Prints the model's responses.
-- Displays token usage.
+* Supports OpenAI and a second provider.
+* Uses one shared `LLMProvider` interface.
+* Sends a system prompt and user message.
+* Returns a common `LLMResult`.
+* Tracks input and output tokens.
+* Allows switching providers using `.env`.
+* Tests provider behavior using fake SDK clients.
 
-# Setup
+## Setup
 
-Create a .env file in the project folder:
-OPENAI_API_KEY=your_api_key_here
+Create a `.env` file:
 
-# Requirements
+```env
+PROVIDER=openai
 
-Python 3.12+
-API-Key
-
-# Run 
-
+OPENAI_API_KEY=your_openai_api_key_here
+OPENROUTER_API_KEY=your_openrouter_api_key_here
 ```
+
+Add `.env` to `.gitignore`:
+
+```text
+.env
+```
+
+### Requirements
+
+* Python 3.12+
+* `uv`
+* API key for the provider you want to use
+
+## Providers
+
+### OpenAI
+
+Uses the OpenAI SDK with the Responses API.
+
+Default model:
+
+```text
+gpt-5-nano
+```
+
+### OpenRouter
+
+OpenRouter is used as the second provider because it provides access to multiple models and has a free option for experimentation.
+
+OpenRouter is **not required by the project design**. It can be replaced with another provider as long as the new provider implements the same `LLMProvider` interface.
+
+## Switching Providers
+
+Change `PROVIDER` in `.env`:
+
+```env
+PROVIDER=openai
+```
+
+or:
+
+```env
+PROVIDER=openrouter
+```
+
+The rest of the application does not need to change.
+
+## Shared Interface
+
+Both providers use:
+
+```python
+class LLMProvider(ABC):
+
+    @abstractmethod
+    def send(self, system_prompt: str, user_message: str) -> LLMResult:
+        pass
+```
+
+Provider responses are converted into:
+
+```python
+class LLMResult(BaseModel):
+    text: str
+    input_tokens: int
+    output_tokens: int
+    provider: str
+    model: str
+```
+
+## Temperature
+
+Temperature was validated with Pydantic using the range:
+
+```text
+0 <= temperature <= 1
+```
+
+Invalid values are rejected before an API call.
+
+During testing, OpenAI returned an error because the model does not support the temperature parameter. I removed it from the OpenAI API call and the related API tests.
+
+This showed that different providers/models can support different API parameters.
+
+## Testing
+
+The project uses pytest.
+
+Run the tests:
+
+```bash
+uv run pytest
+```
+
+Tests cover:
+
+* Provider response conversion
+* Provider selection
+* Missing API keys
+* Temperature validation
+* Temperature boundaries
+
+Fake SDK clients are used so provider tests do not make real API calls.
+
+## Provider Comparison
+
+The same prompt was sent to each provider three times.
+
+**Prompt:**
+
+```text
+You are a helpful assistant.
+
+Explain embeddings in one simple paragraph.
+```
+
+| Provider   | Run | Reply                                                                        | Input Tokens | Output Tokens |
+| ---------- | --: | ---------------------------------------------------------------------------- | -----------: | ------------: |
+| OpenAI     |   1 | An embedding is a way to represent objects as fixed-length vectors...        |           23 |           817 |
+| OpenAI     |   2 | An embedding is a way to turn items into a compact set of numbers...         |           23 |           578 |
+| OpenAI     |   3 | Embeddings are a way to turn objects into fixed-length vectors...            |           23 |           926 |
+| OpenRouter |   1 | An embedding is a way of turning data into a fixed-length list of numbers... |           31 |           105 |
+| OpenRouter |   2 | Embeddings are numerical vector representations of objects...                |           31 |           138 |
+| OpenRouter |   3 | `User Safety: safe`                                                          |          469 |            86 |
+
+*Replies are shortened for readability.*
+
+The providers gave different responses and used different numbers of tokens. OpenRouter also returned `User Safety: safe` on the third run instead of answering the question.
+
+## Running
+
+Set the provider in `.env`, then run:
+
+```bash
 uv run main.py
 ```
 
-# Temperature Experiment
+## Future Work
 
-The project runs the same prompt using different temperature values, such as:
-
-Temperature	Observed result
-0.0	Responses were highly consistent
-0.5	Responses were mostly consistent, with some variation
-1.0	Responses showed more variation
-
-Initial runs produced nearly identical answers at different temperatures, showing that one run is not enough to observe variation. After running each temperature multiple times, higher temperatures produced more varied responses, while lower temperatures were more consistent. Overall, temperature affects randomness, but the difference may not be obvious in every individual run.
-
-
-# Output Example
-
-```
-=== Temperature 0.2 ===
-An SDK (Software Development Kit) is a collection of software tools, libraries, and documentation provided by a company or platform to help developers build applications for its ecosystem. It typically includes pre-written code, APIs, and sample projects that streamline the development process without requiring developers to write everything from scratch. Common examples include Apple's Xcode SDK for iOS/macOS development and Google's Android SDK for mobile app creation.
-
-Tokens used: 331
-
-=== Temperature 1.0 ===
-An SDK (Software Development Kit) is a collection of tools, libraries, documentation, and code samples that developers use to build applications for a specific platform or service. It simplifies the development process by providing pre-built components so programmers don't have to write code from scratch for common functions like authentication or hardware access. Essentially, it acts as a specialized toolbox that ensures compatibility and accelerates the creation of software for a target environment.
-
-Tokens used: 136
-
-```
-
-# Future work
-
- - v2.0 will handle the risk of LLM01:2026 Prompt Injection in the OWASP Top 10 for LLM Applications 2026. In addition that it is the number 1 risk that faces LLM as of September 2026, it is also the easiest one and doesnt have a certain format to be defended against completely.
+* Add more LLM providers.
+* Explore LLM security risks.
+* **v2.0:** Work on **LLM01:2025 Prompt Injection** from the OWASP Top 10 for LLM Applications.
