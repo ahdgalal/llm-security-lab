@@ -3,6 +3,7 @@ load_dotenv()
 
 from openai import OpenAI
 import os
+import sys
 import time
 from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
@@ -129,15 +130,16 @@ def get_provider() -> LLMProvider:
 def main():
 
     try:
-
         provider = get_provider()
 
-        result = provider.send(
-            system_prompt="You are a helpful assistant.",
-            user_message="Explain embeddings in one simple paragraph.",
-        )
     except ValueError as e:
         print(f"\nConfiguration Error: {e}")
+        sys.exit(1)
+
+    result = provider.send(
+                system_prompt="You are a helpful assistant.",
+                user_message="Explain embeddings in one simple paragraph.",
+            )
 
     print("Reply")
     print("--------------")
