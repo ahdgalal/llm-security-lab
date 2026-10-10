@@ -1,5 +1,9 @@
 # LLM Security Lab
 
+[![CI](https://github.com/ahdgalal/llm-security-lab/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ahdgalal/llm-security-lab/actions/workflows/ci.yml)
+
+
+
 A small Python project that provides one interface for working with multiple LLM providers. It uses the OpenAI SDK, Pydantic, and pytest.
 
 
