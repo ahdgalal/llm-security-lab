@@ -1,9 +1,8 @@
-
 FROM python:3.12-slim
 
-WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:0.12.19 /uv /uvx /bin/
 
-RUN pip install uv
+WORKDIR /app
 
 COPY pyproject.toml uv.lock ./
 
