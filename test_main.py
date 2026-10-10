@@ -1,6 +1,8 @@
-import pytest
 from types import SimpleNamespace
-from main import LLMResult, LLMConfig, OpenAIProvider, OpenRouterProvider, get_provider
+
+import pytest
+
+from main import LLMConfig, LLMResult, OpenAIProvider, OpenRouterProvider, get_provider
 
 
 # fake OpenAI response
@@ -12,13 +14,14 @@ def fake_response():
             input_tokens=10,
             output_tokens=5,
             output_tokens_details=SimpleNamespace(reasoning_tokens=2),
-
         ),
     )
+
 
 class FakeResponses:
     def create(self, **kwargs):
         return fake_response()
+
 
 class FakeClient:
     def __init__(self):
@@ -26,6 +29,7 @@ class FakeClient:
 
 
 # Tests
+
 
 def test_openai_provider_converts_response():
     provider = OpenAIProvider(client=FakeClient())
@@ -60,11 +64,13 @@ def test_openrouter_provider_converts_response():
     assert result.model == "fake/model"
     assert result.latency >= 0
 
+
 def test_missing_provider(monkeypatch):
     monkeypatch.delenv("PROVIDER", raising=False)
 
     with pytest.raises(ValueError, match="Unknown provider"):
         get_provider()
+
 
 def test_unknown_provider(monkeypatch):
     monkeypatch.setenv("PROVIDER", "something_else")
@@ -74,6 +80,7 @@ def test_unknown_provider(monkeypatch):
 
 
 # environment variable tests
+
 
 def test_environment_selects_openai(monkeypatch):
     monkeypatch.setenv("PROVIDER", "openai")
@@ -90,6 +97,7 @@ def test_environment_selects_openrouter(monkeypatch):
 
 
 # missing API key test
+
 
 def test_missing_openai_api_key(monkeypatch):
     monkeypatch.setenv("PROVIDER", "openai")
@@ -109,13 +117,16 @@ def test_missing_openrouter_api_key(monkeypatch):
 
 # temperature tests
 
+
 def test_temperature_valid():
     config = LLMConfig(temperature=0.5)
     assert config.temperature == 0.5
 
+
 def test_temperature_too_low():
     with pytest.raises(ValueError):
         LLMConfig(temperature=-0.1)
+
 
 def test_temperature_too_high():
     with pytest.raises(ValueError):
@@ -125,6 +136,7 @@ def test_temperature_too_high():
 def test_temperature_lower_boundary():
     config = LLMConfig(temperature=0)
     assert config.temperature == 0
+
 
 def test_temperature_upper_boundary():
     config = LLMConfig(temperature=1)

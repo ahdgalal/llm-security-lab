@@ -1,11 +1,11 @@
-from dotenv import load_dotenv
-
-from openai import OpenAI
 import os
 import sys
 import time
-from pydantic import BaseModel, Field
 from abc import ABC, abstractmethod
+
+from dotenv import load_dotenv
+from openai import OpenAI
+from pydantic import BaseModel, Field
 
 
 # same result format for every provider
@@ -25,14 +25,12 @@ class LLMConfig(BaseModel):
 
 # shared interface
 class LLMProvider(ABC):
-
     @abstractmethod
     def send(self, system_prompt: str, user_message: str) -> LLMResult:
         pass
 
 
 class OpenAIProvider(LLMProvider):
-
     def __init__(self, client=None, model: str = "gpt-5-nano"):
 
         if client is None:
@@ -58,7 +56,6 @@ class OpenAIProvider(LLMProvider):
 
         latency = time.perf_counter() - start
 
-
         return LLMResult(
             text=response.output_text,
             input_tokens=response.usage.input_tokens,
@@ -71,7 +68,6 @@ class OpenAIProvider(LLMProvider):
 
 
 class OpenRouterProvider(LLMProvider):
-
     def __init__(self, client=None, model: str = "openrouter/free", temperature=0.7):
 
         if client is None:
@@ -80,10 +76,7 @@ class OpenRouterProvider(LLMProvider):
             if not api_key:
                 raise ValueError("OPENROUTER_API_KEY is not set")
 
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=api_key
-            )
+            client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
 
         self.client = client
         self.config = LLMConfig(temperature=temperature)
@@ -137,9 +130,9 @@ def main():
         sys.exit(1)
 
     result = provider.send(
-                system_prompt="You are a helpful assistant.",
-                user_message="Explain embeddings in one simple paragraph.",
-            )
+        system_prompt="You are a helpful assistant.",
+        user_message="Explain embeddings in one simple paragraph.",
+    )
 
     print("Reply")
     print("--------------")
