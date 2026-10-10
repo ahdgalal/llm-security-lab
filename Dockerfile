@@ -11,4 +11,4 @@ RUN uv sync --locked --no-dev
 
 COPY main.py ./
 
-CMD ["uv", "run", "main.py"]
+CMD ["uv", "run", "--no-sync", "main.py"]
