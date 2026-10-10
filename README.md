@@ -71,6 +71,10 @@ Uses the OpenAI Responses API with `gpt-5-nano`.
 
 Uses OpenRouter through the OpenAI SDK and can route requests to different models. For reproducible evaluations, a specific model should be pinned instead of using `openrouter/free`.
 
+## CI
+
+GitHub Actions runs on every push and pull request. It runs Ruff linting and formatting checks, pytest, and builds the Docker image.
+
 
 ## Testing
 
@@ -83,7 +87,6 @@ Tests cover:
 * Temperature validation and boundaries
 * Latency
 * Provider response metadata
-* GitHub Actions runs Ruff linting, formatting checks, pytest, and a docker image build on every push and pull request.
 
 
 ## Findings
