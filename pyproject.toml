@@ -1,7 +1,7 @@
 [project]
 name = "llm-security-lab"
 version = "0.1.0"
-description = "LLM provider abstraction and evaluation framework"
+description = "Python project for comparing OpenAI and OpenRouter LLM providers"
 readme = "README.md"
 authors = [
     { name = "ahdgalal", email = "ahdgalal1@gmail.com" }

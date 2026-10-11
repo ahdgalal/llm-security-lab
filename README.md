@@ -99,6 +99,14 @@ Detailed experiments and security research are kept separately so they are not l
 
 * [Temperature Experiment](docs/temperature-experiment.md)
 * [Prompt Injection — OWASP LLM01:2026](docs/prompt-injection.md)
+* [Provider comparison](docs/provider-comparison.md)
+
+
+## Planned
+
+- Improve the reproducibility of provider comparisons
+- Record raw usage data and reply excerpts for each experiment
+- Investigate and document provider-specific usage differences
 
 
 ## Project Structure

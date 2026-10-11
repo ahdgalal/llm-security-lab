@@ -2,6 +2,8 @@
 
 I compared OpenAI `gpt-5-nano` with OpenRouter's `openrouter/free` using the same embeddings prompt.
 
+- **Prompt:** Explain embeddings in one simple paragraph.
+
 ### OpenAI
 
 | Run | Model | Input | Output | Reasoning | Latency |
@@ -10,7 +12,7 @@ I compared OpenAI `gpt-5-nano` with OpenRouter's `openrouter/free` using the sam
 | 2 | gpt-5-nano | 23 | 666 | 512 | 8.39s |
 | 3 | gpt-5-nano | 23 | 900 | 704 | 10.78s |
 
-`gpt-5-nano` gave consistent answers, but most of the output tokens were reasoning tokens (about 76–78%).
+`gpt-5-nano` output tokens were reasoning tokens (about 76–78%).
 
 ### OpenRouter
 
@@ -21,5 +23,7 @@ I compared OpenAI `gpt-5-nano` with OpenRouter's `openrouter/free` using the sam
 | 3 | nvidia/nemotron-3.5-content-safety:free | 469 | 81 | 78 | 11.78s |
 
 OpenRouter was less consistent because `openrouter/free` routed requests to different models. Runs 2 and 3 were sent to a safety model, which returned `User Safety: safe` instead of answering the question.
+
+**Run 2 :  Unverified: original raw response not saved** |
 
 For evals and red-teaming, I would **pin one specific model** so the results are reproducible.
