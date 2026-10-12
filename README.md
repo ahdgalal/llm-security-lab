@@ -54,7 +54,7 @@ Tests use fake SDK clients, so they need no API keys or network. On every push a
 Detailed experiments and security research are kept separately so they are not lost when the README changes.
 
 * [Temperature Experiment](docs/temperature-experiment.md)
-* [Prompt Injection — OWASP LLM01:2026](docs/prompt-injection.md)
+* [Prompt Injection : OWASP LLM01:2026](docs/prompt-injection.md)
 * [Provider comparison](docs/provider-comparison.md)
 * [Security Scans](docs/security-scans.md)
 
