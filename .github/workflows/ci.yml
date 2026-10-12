@@ -54,9 +54,9 @@ jobs:
           uv run pip-audit --locked "$audit_dir"
 
       - name: Build Docker image
-        run: docker build -t llm-security-lab .
+        run: docker build --pull -t llm-security-lab .
 
-       - name: Verify runtime image
+      - name: Verify runtime image
         shell: bash
         run: |
           set -euo pipefail
