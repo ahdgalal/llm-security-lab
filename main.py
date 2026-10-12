@@ -93,6 +93,8 @@ class OpenRouterProvider(LLMProvider):
             input=user_message,
         )
 
+        
+
         latency = time.perf_counter() - start
 
         return LLMResult(
