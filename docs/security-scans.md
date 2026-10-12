@@ -44,16 +44,29 @@ Result: No secrets detected in the image by the secret scan performed.
 
 ## Trivy (image vulnerabilities)
 
-The initial full scan reported:
+The initial full scan reported 172 findings. After rebuilding with `--pull` and adding `apt-get upgrade`, the image still reports 44 High-severity vulnerabilities and 0 Critical vulnerabilities.
 
-| Severity | Findings |
-|---|---:|
-| High | 44 |
-| Medium | 63 |
-| Low | 62 |
-| Unknown | 3 |
-| **Total** | **172** |
+The findings are in Debian 13 (Trixie) system packages. Multiple packages can be affected by the same CVE, so the finding count is not the number of unique vulnerabilities.
 
-These counts are a baseline, not individual risk decisions. Rebuild with the refreshed base image and scan again.
+### High-severity findings
 
-**Individual triage is still required.** For every remaining finding, record its vulnerability ID, package and installed version, severity, decision, reason and evidence. Fix the finding where practical; otherwise record a verified false positive or an accepted risk with a review date. Do not mark all findings as accepted risks based solely on the severity counts.
+| CVE | Affected package group | Current decision |
+|---|---|---|
+| CVE-2025-69720 | ncurses packages | Pending remediation; the Debian Trixie package remains flagged. |
+| CVE-2026-16742 | systemd libraries | Pending applicability review; the advisory concerns systemd-homed, which this container does not run. Do not treat this alone as proof of a false positive. |
+| CVE-2026-54369 | libacl1 | Pending remediation and applicability review. |
+| CVE-2026-76642 | util-linux packages | Pending remediation; the Debian Trixie package remains flagged. |
+| CVE-2026-78408 | util-linux packages | Pending remediation; the Debian Trixie package remains flagged. |
+| CVE-2026-78409 | util-linux packages | Pending remediation; the Debian Trixie package remains flagged. |
+| CVE-2026-78410 | util-linux packages | Pending remediation; the Debian Trixie package remains flagged. |
+| CVE-2026-9538 | perl-base | Review the reported `fix_deferred` status and applicability. |
+
+The package-level details are available in the Trivy report. The Debian tracker should be checked again before deciding that a finding is fixed or not applicable.
+
+### Mitigations and follow-up
+
+- The container runs as a non-root user.
+- The container runs a command and exits; it is not a long-running network service.
+- No findings are marked fixed or false positive solely because the application does not intentionally use the affected utility.
+- Recheck the findings after Debian publishes relevant updates and rebuild the image.
+- Review date: 2026-11-12.
