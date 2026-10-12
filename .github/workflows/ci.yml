@@ -1,4 +1,3 @@
-
 name: CI
 
 on:
@@ -38,5 +37,98 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
+      - name: Scan application code with Bandit
+        run: uv run bandit main.py
+
+      - name: Audit locked dependencies with pip-audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          audit_dir="$(mktemp -d)"
+          trap 'rm -rf "$audit_dir"' EXIT
+
+          uv export --locked --all-groups --no-emit-project \
+            --format pylock.toml \
+            --output-file "$audit_dir/pylock.toml"
+
+          uv run pip-audit --locked "$audit_dir"
+
       - name: Build Docker image
         run: docker build -t llm-security-lab .
+
+       - name: Verify runtime image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Inspect the image's final filesystem for an exact .env filename.
+          image_container="$(docker create llm-security-lab)"
+          trap 'docker rm -f "$image_container" >/dev/null 2>&1 || true' EXIT
+
+          docker export "$image_container" > /tmp/llm-security-lab-rootfs.tar
+
+          if tar -tf /tmp/llm-security-lab-rootfs.tar | grep -Eq '(^|/)\.env$'; then
+            echo "::error::The Docker image contains a .env file."
+            exit 1
+          fi
+
+          echo "No .env file found in the image filesystem."
+
+          docker rm "$image_container" >/dev/null
+          trap - EXIT
+
+          # The app environment must not contain pytest.
+          if docker run --rm --entrypoint uv llm-security-lab \
+            run --no-sync python -c \
+            "import importlib.util, sys; sys.exit(1 if importlib.util.find_spec('pytest') else 0)"
+          then
+            echo "pytest is not installed in the application environment."
+          else
+            echo "::error::pytest is installed or the pytest check failed."
+            exit 1
+          fi
+
+          # With no configuration supplied, the app must exit with code 1.
+          set +e
+          docker run --rm llm-security-lab > /tmp/no-config.log 2>&1
+          status=$?
+          set -e
+
+          cat /tmp/no-config.log
+
+          if [ "$status" -ne 1 ]; then
+            echo "::error::Expected exit code 1 without configuration; got $status."
+            exit 1
+          fi
+
+          echo "Missing-configuration check passed."
+
+      - name: Scan Dockerfile configuration with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: table
+          exit-code: '1'
+
+      - name: Scan Docker image for secrets
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: llm-security-lab
+          scanners: secret
+          format: table
+          exit-code: '1'
+
+      - name: Scan Docker image for fixable High and Critical vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: llm-security-lab
+          scanners: vuln
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: table
+          exit-code: '1'
